@@ -235,7 +235,7 @@ html, body {
 <div class="frame">
 
   <div class="headline">
-    <div class="eyebrow">today</div>
+    <div class="eyebrow">all time</div>
     <div class="big-num" id="calmedNum">0</div>
     <div class="caption" id="calmedCaption">people guided to calm</div>
   </div>
@@ -256,20 +256,20 @@ html, body {
 
   <div class="stats">
     <div class="stat">
+      <div class="stat-label">calmed today</div>
+      <div class="stat-value" id="calmedToday">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">total calmness score</div>
+      <div class="stat-value" id="calmnessScore">0</div>
+    </div>
+    <div class="stat">
       <div class="stat-label">arrivals today</div>
       <div class="stat-value" id="entriesToday">0</div>
     </div>
     <div class="stat">
       <div class="stat-label">departures today</div>
       <div class="stat-value" id="exitsToday">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">all time calmed</div>
-      <div class="stat-value" id="allTime">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">conversion</div>
-      <div class="stat-value" id="conversion">0%</div>
     </div>
   </div>
 
@@ -281,7 +281,7 @@ html, body {
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbTc8UqVbVAJXsW8NhbfRneZPBfmKZ19ei5aASFqidwWKzpBbFkavfgBibJK4zPyZG-A/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7DC957ona0bUBoZiJBuLcQv7J40t4j_XqtIilL1FjrU9yK5N7GC_Iqq8zSBLH7GClgw/exec';
 const REFRESH_MS = 30000;
 const $ = id => document.getElementById(id);
 
@@ -298,14 +298,18 @@ async function load() {
 }
 
 function render(d) {
-  $('calmedNum').textContent = d.calmed ?? 0;
-  $('calmedCaption').textContent = (d.calmed === 1) ? 'person guided to calm' : 'people guided to calm';
+  // hero is now lifetime calmed
+  $('calmedNum').textContent = d.allTimeCalmed ?? 0;
+  $('calmedCaption').textContent = (d.allTimeCalmed === 1) ? 'person guided to calm' : 'people guided to calm';
+
+  // stats row
+  $('calmedToday').textContent = d.calmed ?? 0;
   $('entriesToday').textContent = d.todayEntries ?? 0;
   $('exitsToday').textContent = d.todayExits ?? 0;
-  $('allTime').textContent = d.allTimeCalmed ?? 0;
 
-  const conv = (d.todayExits > 0) ? Math.round((d.calmed / d.todayExits) * 100) : 0;
-  $('conversion').textContent = conv + '%';
+  // total calmness score, prefix a plus when positive so the gain is visible
+  const score = Number(d.calmnessScore) || 0;
+  $('calmnessScore').textContent = (score > 0 ? '+' : '') + score;
 
   const entry = Number(d.avgEntry) || 0;
   const exit = Number(d.avgExit) || 0;
